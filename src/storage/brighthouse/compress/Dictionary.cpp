@@ -24,6 +24,68 @@ Software Foundation,  Inc., 59 Temple Place, Suite 330, Boston, MA
 static const uint MAXTOTAL = 65536;//RangeCoder::MAX_TOTAL;
 #endif
 
+template<> const ushort Dictionary<uchar>::  MAXKEYS = 256;
+template<> const ushort Dictionary<ushort>:: MAXKEYS = 1024;
+template<> const ushort Dictionary<uint>::   MAXKEYS = 4096;
+template<> const ushort Dictionary<_uint64>:: MAXKEYS = 4096;
+
+template<> const uint Dictionary<uchar>::  NBUCK = 256;
+template<> const uint Dictionary<ushort>:: NBUCK = 65536;
+template<> const uint Dictionary<uint>::   NBUCK = 65536;
+template<> const uint Dictionary<_uint64>:: NBUCK = 65536;
+
+
+
+template<class T> inline bool Dictionary<T>::Insert(T key, uint count)
+{
+	uint b = hash(key);
+	short k = buckets[b];
+	while((k >= 0) && (keys[k].key != key))
+		k = next[k];
+	
+	if(k < 0) {
+		if(nkeys >= MAXKEYS) return false;
+		keys[nkeys].key = key;
+		keys[nkeys].count = count;
+		next[nkeys] = buckets[b];			// TODO: time - insert new keys at the END of the list
+		buckets[b] = nkeys++;
+	}
+	else keys[k].count += count;
+	return true;
+}
+
+template<class T> inline bool Dictionary<T>::Encode(RangeCoder* dest, T key)
+{
+	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(compress);
+	
+	// find the 'key' in the hash
+	uint b = hash(key);
+	short k = buckets[b];
+	while((k >= 0) && (keys[k].key != key))
+		k = next[k];
+	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(k >= 0);			// TODO: handle ESC encoding
+	
+	dest->EncodeShift(keys[k].low, keys[k].count, tot_shift);
+	return false;
+}
+
+template<class T> inline bool Dictionary<T>::Decode(RangeCoder* src, T& key)
+{
+	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(decompress);
+	uint count = src->GetCountShift(tot_shift);
+	short k = cnt2val[count];		// TODO: handle ESC decoding
+	key = keys[k].key;
+	src->DecodeShift(keys[k].low, keys[k].count, tot_shift);
+	return false;
+}
+
+
+template<> inline uint Dictionary<uchar>::hash(uchar key) {
+	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(NBUCK >= 256); 
+	return key;
+}
+
+
 template<class T> void Dictionary<T>::Clear()
 {
 	BHASSERT(MAXTOTAL > MAXKEYS+1, "should be 'MAXTOTAL > MAXKEYS+1'");
@@ -155,14 +217,3 @@ template class Dictionary<uchar>;
 template class Dictionary<ushort>;
 template class Dictionary<uint>;
 template class Dictionary<_uint64>;
-
-template<> const ushort Dictionary<uchar>::  MAXKEYS = 256;
-template<> const ushort Dictionary<ushort>:: MAXKEYS = 1024;
-template<> const ushort Dictionary<uint>::   MAXKEYS = 4096;
-template<> const ushort Dictionary<_uint64>:: MAXKEYS = 4096;
-
-template<> const uint Dictionary<uchar>::  NBUCK = 256;
-template<> const uint Dictionary<ushort>:: NBUCK = 65536;
-template<> const uint Dictionary<uint>::   NBUCK = 65536;
-template<> const uint Dictionary<_uint64>:: NBUCK = 65536;
-

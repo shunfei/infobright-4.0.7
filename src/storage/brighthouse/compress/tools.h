@@ -54,7 +54,11 @@ inline uint GetBitLen(uint x)
 	return b;
 #endif
 #else
-	#error "Unsupported operating system."
+	register uint b = 0;
+	while (((x >> b) != 0) && (b < sizeof(x)*8))
+		b++;
+	return b;
+	// #error "Unsupported operating system."
 #endif
 }
 
@@ -111,7 +115,11 @@ inline uint GetBitLen(_uint64 x)
 	return b;
 #endif
 #else
-	#error "Unsupported operating system."
+	register uint b = 0;
+	while (((x >> b) != 0) && (b < sizeof(x)*8))
+		b++;
+	return b;
+	// #error "Unsupported operating system."
 #endif
 }
 

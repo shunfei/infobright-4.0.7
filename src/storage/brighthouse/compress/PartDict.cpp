@@ -15,7 +15,7 @@ Software Foundation,  Inc., 59 Temple Place, Suite 330, Boston, MA
 02111-1307 USA  */
 
 #include "PartDict.h"
-#include "core/QuickMath.h"
+#include "QuickMath.h"
 #include "tools.h"
 #include "util/BHQSort.h"
 
@@ -27,6 +27,121 @@ static const uint MAXTOTAL = 65536;//RangeCoder::MAX_TOTAL;
 static const uint MINOCCUR = 4;                         // how many times a value must occur to be frequent value
 static const uint MAXFREQ = (MAXTOTAL+20)/MINOCCUR;     // max no. of frequent values = max size of dictionary; must be smaller than USHRT_MAX
 #endif
+
+template<> const unsigned int PartDict<unsigned long long>::HashTab::nbuck = 0x20000;
+template<> const unsigned int PartDict<unsigned int>  ::HashTab::nbuck = 0x20000;
+template<> const unsigned int PartDict<unsigned short>::HashTab::nbuck = 65536;
+template<> const unsigned int PartDict<unsigned char> ::HashTab::nbuck = 256;
+
+template<> const unsigned int PartDict<unsigned long long>::HashTab::mask = 0x20000 - 1;
+template<> const unsigned int PartDict<unsigned int>  ::HashTab::mask = 0x20000 - 1;
+template<> const unsigned int PartDict<unsigned short>::HashTab::mask = 65536 - 1;
+template<> const unsigned int PartDict<unsigned char> ::HashTab::mask = 256 - 1;
+
+
+template<class T> inline void PartDict<T>::HashTab::insert(T key)
+{
+	//AKey* p = keys + fun(key);
+	//while(p->count && (p->key != key))
+	//	if(++p == stop) p = keys;
+	//if(p->count++) return NULL;
+	//p->key = key;
+	//return p;
+
+	uint b = fun(key);
+	int k = buckets[b];
+	if(k < 0) nusebuck++;
+	else while((k >= 0) && (keys[k].key != key))
+		k = keys[k].next;
+
+	if(k < 0) {
+#ifdef SOLARIS
+        BHASSERT(nkeys < 65536, "should be 'nkeys < PartDict::MAXLEN'");
+#else
+        BHASSERT(nkeys < PartDict::MAXLEN, "should be 'nkeys < PartDict::MAXLEN'");
+#endif
+		AKey& ak = keys[nkeys];
+		ak.key = key;
+		ak.count = 1;
+		ak.low = (uint)-1;
+		//ak.high = 0;
+		ak.next = buckets[b];			// TODO: time - insert new keys at the END of the list
+		buckets[b] = nkeys++;
+	}
+	else keys[k].count++;
+}
+
+template<class T> inline int PartDict<T>::HashTab::find(T key)
+{
+	//AKey* p = keys + fun(key);
+	//while(p->count && (p->key != key))
+	//	if(++p == stop) p = keys;
+	//return p->count ? p : NULL;
+
+	uint b = fun(key);
+	int k = buckets[b];
+	while((k >= 0) && (keys[k].key != key))
+		k = keys[k].next;
+	return k;
+}
+
+
+template<> inline unsigned int PartDict<unsigned long long>::HashTab::fun(unsigned long long key) {
+	uint x = ((uint)key ^ *((uint*)&key+1));
+	BHASSERT(topbit < sizeof(uint)*8, "should be 'topbit < sizeof(uint)*8'");
+	return (x&mask)^(x>>topbit);
+}
+template<> inline unsigned int PartDict<unsigned int>::HashTab::fun(unsigned int key) {
+	BHASSERT(topbit < sizeof(uint)*8, "should be 'topbit < sizeof(uint)*8'");
+	return (key&mask)^(key>>topbit);
+}
+template<> inline unsigned int PartDict<unsigned short>::HashTab::fun(unsigned short key) {
+	BHASSERT(key <= mask, "should be 'key <= mask'");
+	return key;
+}
+template<> inline unsigned int PartDict<unsigned char>::HashTab::fun(unsigned char key) {
+	BHASSERT(key <= mask, "should be 'key <= mask'");
+	return key;
+}
+
+
+template<class T> inline bool PartDict<T>::GetRange(T val, uint& low, uint& count)
+{
+	//BHASSERT(compress, "'compress' should be true");
+	int k = hash.find(val);
+	//HashTab::AKey* p = hash.find(val);
+	// OK under assumption that PartDict is built on the whole data to be compressed
+	BHASSERT(k >= 0, "should be 'k >= 0'");
+	//high = hash.keys[k].high;
+	low = hash.keys[k].low;
+	if(low == (uint)-1) {			// ESCape
+		low = esc_low;
+		count = esc_usecnt;
+		//high = esc_high;
+		return true;
+	}
+	count = hash.keys[k].count;
+	//low = hash.keys[k].low;
+	//BHASSERT(low < high, "should be 'low < high'");
+	return false;
+}
+
+template<class T> inline bool PartDict<T>::GetVal(uint c, T& val, uint& low, uint& count)
+{
+	//BHASSERT(decompress, "'decompress' should be true");
+	if(c >= esc_low) {		// ESCape
+		low = esc_low;
+		count = esc_usecnt;
+		//high = esc_high;
+		return true;
+	}
+	ValRange& vr = freqval[cnt2val[c]];
+	val = vr.val;
+	low = vr.low;
+	count = vr.count;
+	//high = vr.high;
+	return false;
+}
 
 template<class T> inline void PartDict<T>::HashTab::Clear()
 {
@@ -253,7 +368,7 @@ template<class T> bool PartDict<T>::Encode(RangeCoder* coder, DataSet<T>* datase
 {
 	// build dictionary
 	Create(dataset);
-	if(Predict(dataset) > 0.98 * PredictUni(dataset)) return false;
+	if(Predict(dataset) > 0.98 * this->PredictUni(dataset)) return false;
 
 	// save version of this routine, using 3 bits (7 = 2^3-1)
 	coder->EncodeUniform((uchar)0, (uchar)7);
@@ -325,15 +440,15 @@ template<class T> void PartDict<T>::Merge(DataSet<T>* dataset)
 
 //-------------------------------------------------------------------------------------
 
-template<> const unsigned int PartDict<unsigned long long>::HashTab::nbuck = 0x20000;
-template<> const unsigned int PartDict<unsigned int>  ::HashTab::nbuck = 0x20000;
-template<> const unsigned int PartDict<unsigned short>::HashTab::nbuck = 65536;
-template<> const unsigned int PartDict<unsigned char> ::HashTab::nbuck = 256;
+// template<> const unsigned int PartDict<unsigned long long>::HashTab::nbuck = 0x20000;
+// template<> const unsigned int PartDict<unsigned int>  ::HashTab::nbuck = 0x20000;
+// template<> const unsigned int PartDict<unsigned short>::HashTab::nbuck = 65536;
+// template<> const unsigned int PartDict<unsigned char> ::HashTab::nbuck = 256;
 
-template<> const unsigned int PartDict<unsigned long long>::HashTab::mask = 0x20000 - 1;
-template<> const unsigned int PartDict<unsigned int>  ::HashTab::mask = 0x20000 - 1;
-template<> const unsigned int PartDict<unsigned short>::HashTab::mask = 65536 - 1;
-template<> const unsigned int PartDict<unsigned char> ::HashTab::mask = 256 - 1;
+// template<> const unsigned int PartDict<unsigned long long>::HashTab::mask = 0x20000 - 1;
+// template<> const unsigned int PartDict<unsigned int>  ::HashTab::mask = 0x20000 - 1;
+// template<> const unsigned int PartDict<unsigned short>::HashTab::mask = 65536 - 1;
+// template<> const unsigned int PartDict<unsigned char> ::HashTab::mask = 256 - 1;
 
 //-------------------------------------------------------------------------------------
 

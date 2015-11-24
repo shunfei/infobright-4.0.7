@@ -26,7 +26,7 @@ Software Foundation,  Inc., 59 Temple Place, Suite 330, Boston, MA
 #include "PartDict.h"
 #include "TopBitDict.h"
 #include "BasicDataFilt.h"
-#include "core/QuickMath.h"
+#include "QuickMath.h"
 #include "common/bhassert.h"
 #include "core/tools.h"
 

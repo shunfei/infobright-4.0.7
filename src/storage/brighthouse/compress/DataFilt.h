@@ -19,7 +19,7 @@ Software Foundation,  Inc., 59 Temple Place, Suite 330, Boston, MA
 
 #include <stdio.h>
 #include "RangeCoder.h"
-#include "../core/QuickMath.h"
+#include "QuickMath.h"
 
 
 template<class T> struct DataSet {

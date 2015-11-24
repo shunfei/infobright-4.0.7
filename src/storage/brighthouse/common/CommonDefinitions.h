@@ -153,7 +153,7 @@ typedef unsigned int  uint;
 #define min64_3(a,b,c)            (((a) < (b)) ? (((a) < (c)) ? (a) : (c)) : (((b) < (c)) ? (b) : (c)))
 #endif
 
-#include "mysql_gate.h"
+// #include "mysql_gate.h"
 
 #define SPTR(TYPE) boost::shared_ptr<TYPE>
 #define APTR(TYPE) std::auto_ptr<TYPE>

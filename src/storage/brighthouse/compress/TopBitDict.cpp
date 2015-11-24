@@ -15,7 +15,7 @@ Software Foundation,  Inc., 59 Temple Place, Suite 330, Boston, MA
 02111-1307 USA  */
 
 #include "TopBitDict.h"
-#include "core/QuickMath.h"
+#include "QuickMath.h"
 #include "tools.h"
 #include "common/bhassert.h"
 
@@ -271,7 +271,7 @@ template<class T> bool TopBitDict<T>::Encode(RangeCoder* coder, DataSet<T>* data
 	// find optimum dictionary
 	Dict* dict;
 	uint nbit = GetBitLen(maxval), bitdict;
-	if(FindOptimum(dataset, nbit, bitdict, dict) >= 0.98 * PredictUni(dataset)) return false;
+	if(FindOptimum(dataset, nbit, bitdict, dict) >= 0.98 * this->PredictUni(dataset)) return false;
 	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(bitdict);
 
 	dict->SetLows();

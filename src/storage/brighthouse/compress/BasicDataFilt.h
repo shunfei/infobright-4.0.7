@@ -18,7 +18,7 @@ Software Foundation,  Inc., 59 Temple Place, Suite 330, Boston, MA
 #define __COMPRESSION_BASICDATAFILT_H
 
 #include "tools.h"
-#include "core/QuickMath.h"
+#include "QuickMath.h"
 #include "DataFilt.h"
 #include "Dictionary.h"
 

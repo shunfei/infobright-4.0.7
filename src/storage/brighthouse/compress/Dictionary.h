@@ -51,7 +51,7 @@ private:
 	short* buckets;			// [NBUCK] indices into 'keys'; -1 means empty bucket
 	short* next;			// [MAXKEYS] next[k] is the next element in a bucket after key no. k, or -1
 	uint hash(T key)		// hash function
-	{ BHASSERT_WITH_NO_PERFORMANCE_IMPACT(NBUCK >= 65536); return (ushort)key; }
+	{ /*BHASSERT_WITH_NO_PERFORMANCE_IMPACT(NBUCK >= 65536);*/ return (ushort)key; }
 
 	KeyRange** order;		// [MAXKEYS]
 
@@ -83,54 +83,13 @@ public:
 };
 
 
-template<class T> inline bool Dictionary<T>::Insert(T key, uint count)
-{
-	uint b = hash(key);
-	short k = buckets[b];
-	while((k >= 0) && (keys[k].key != key))
-		k = next[k];
-	
-	if(k < 0) {
-		if(nkeys >= MAXKEYS) return false;
-		keys[nkeys].key = key;
-		keys[nkeys].count = count;
-		next[nkeys] = buckets[b];			// TODO: time - insert new keys at the END of the list
-		buckets[b] = nkeys++;
-	}
-	else keys[k].count += count;
-	return true;
-}
+//-------------------------------------------------------------------------------------
 
-template<class T> inline bool Dictionary<T>::Encode(RangeCoder* dest, T key)
-{
-	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(compress);
-	
-	// find the 'key' in the hash
-	uint b = hash(key);
-	short k = buckets[b];
-	while((k >= 0) && (keys[k].key != key))
-		k = next[k];
-	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(k >= 0);			// TODO: handle ESC encoding
-	
-	dest->EncodeShift(keys[k].low, keys[k].count, tot_shift);
-	return false;
-}
+// template class Dictionary<uchar>;
+// template class Dictionary<ushort>;
+// template class Dictionary<uint>;
+// template class Dictionary<_uint64>;
 
-template<class T> inline bool Dictionary<T>::Decode(RangeCoder* src, T& key)
-{
-	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(decompress);
-	uint count = src->GetCountShift(tot_shift);
-	short k = cnt2val[count];		// TODO: handle ESC decoding
-	key = keys[k].key;
-	src->DecodeShift(keys[k].low, keys[k].count, tot_shift);
-	return false;
-}
-
-
-template<> inline uint Dictionary<uchar>::hash(uchar key) {
-	BHASSERT_WITH_NO_PERFORMANCE_IMPACT(NBUCK >= 256); 
-	return key;
-}
 
 
 #endif
