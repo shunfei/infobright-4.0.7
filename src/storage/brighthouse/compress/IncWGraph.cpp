@@ -409,7 +409,7 @@ void IncWGraph::Node::Rescale(uchar shift)
 		t += edge[i].count;
 	}
 	total = t;
-	if((total != t) || (total > MAX_TOTAL)) Rescale();
+	if((total != t)/* || (total > MAX_TOTAL)*/) Rescale();
 }
 
 IncWGraph::Node* IncWGraph::InsertNode(Node* base, Edge* edge, ushort proj)
@@ -498,7 +498,7 @@ inline IncWGraph::Edge* IncWGraph::Node::AddEdge(uchar s, ushort len, bool solid
 	edge[e].Init(s, len, solid, final, init_count);
 	nedge = (uchar)(e + 1);
 	total += EscCount() + init_count;
-	if((total <= t) || (total > MAX_TOTAL)) Rescale();
+	if((total <= t)/* || (total > MAX_TOTAL)*/) Rescale();
 	return edge + e;
 }
 inline IncWGraph::Edge* IncWGraph::Node::AddEdge(uchar s, ushort len, bool solid, Node* final, IncAlloc* mem)
@@ -523,7 +523,7 @@ inline void IncWGraph::Node::UpdateCount(Edge*& e, Count update)
 	// increase count and total, do rescaling if necessary
 	BHASSERT_WITH_NO_PERFORMANCE_IMPACT((e >= edge) && (e - edge < GetNEdge()));
 	Count t = total + update;
-	if((t <= total) || (t > MAX_TOTAL)) Rescale();
+	if((t <= total)/* || (t > MAX_TOTAL)*/) Rescale();
 	Count c = (e->count += update);
 	total += update;
 

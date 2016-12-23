@@ -36,22 +36,24 @@ struct FailedAssertion {
 /* Debug version of assertion macros. */
 #define BHSTRINGIFY_REAL(a) #a
 #define BHSTRINGIFY(a) BHSTRINGIFY_REAL(a)
-#define BHASSERT( cond, message ) do { if ( ! ( cond ) ) { if ( getenv("BHUT") ) { throw FailedAssertion( #cond #message ); } else { assert((cond)&&(message)); } } } while( 0 )
-#define BHASSERT_WITH_NO_PERFORMANCE_IMPACT(condition) \
-	do { \
-		if ( ! ( condition ) ) { \
-			if ( getenv("BHUT") ) { \
-				std::string msg("Failed assertion: "); \
-				msg += #condition; \
-				msg += ", from: "; \
-				msg += __FILE__":"; \
-				msg += BHSTRINGIFY(__LINE__); \
-				throw FailedAssertion(msg); \
-			} else { \
-				assert(condition); \
-			} \
-		} \
-	} while( 0 )
+#define BHASSERT(condition, message) do { if (!(condition)) { throw RCException(message); } } while(0)
+#define BHASSERT_WITH_NO_PERFORMANCE_IMPACT(condition) assert(condition)
+// #define BHASSERT( cond, message ) do { if ( ! ( cond ) ) { if ( getenv("BHUT") ) { throw FailedAssertion( #cond #message ); } else { assert((cond)&&(message)); } } } while( 0 )
+// #define BHASSERT_WITH_NO_PERFORMANCE_IMPACT(condition) \
+// 	do { \
+// 		if ( ! ( condition ) ) { \
+// 			if ( getenv("BHUT") ) { \
+// 				std::string msg("Failed assertion: "); \
+// 				msg += #condition; \
+// 				msg += ", from: "; \
+// 				msg += __FILE__":"; \
+// 				msg += BHSTRINGIFY(__LINE__); \
+// 				throw FailedAssertion(msg); \
+// 			} else { \
+// 				assert(condition); \
+// 			} \
+// 		} \
+// 	} while( 0 )
 #endif
 
 #ifdef EXTRA_GUARDS
