@@ -1,43 +1,60 @@
-This project is based on infobright-4.0.7.
+This project is based on infobright-4.0.7 community edition.
 
-Try to make the compress module compilable independently, both on Linux and Mac ox. Some code have to modified for that.
+We exported the compression algorithm to Java via JNI.
 
-##install boost:
-* linux:
 
-First down load boost from http://www.boost.org/users/download/, untar it, and then install by
-```
-./bootstrap.sh --prefix=/usr/local
-./b2 install
-```
+*Node: You should compile c++ lib on the same platform as your cluster will run.*
 
-* mac:
+### Install boost on Linux
 
-```
-brew install boost
+* Download boost from [www.boost.org](http://www.boost.org/users/download/), we use `boost_1_59_0.tar.gz`, higher version should work as well.
+* Compile boost
 
-#if facing permission issue
-sudo chown -R `whoami` /usr/local
-```
-
-## Setup environment:
-
-```
-export CPLUS_INCLUDE_PATH=${CPLUS_INCLUDE_PATH}:/usr/local/include
-export C_INCLUDE_PATH=${C_INCLUDE_PATH}:/usr/local/include
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+Switch to the appropriate user,
+	
+```shell
+$> tar -xzf boost_1_59_0.tar.gz
+$> cd boost_1_59_0
+$> ./bootstrap.sh --prefix=/usr/local
+$> ./b2 install
+$> ls /usr/local/lib/libboost_system.so
 ```
 
-## Let's compile!
+Check boost libs at `/usr/local/lib/`, we only need `/usr/local/lib/libboost_system.so`
 
-Download source code of Infobright Community Edition from http://www.infobright.org/, untar it.
+### Install boost on Mac
+
+Install via brew
+
+```shell
+$> sudo brew install boost
+$> ls /usr/local/lib/libboost_system.dylib
+```
+
+
+### Compile cpp lib
+
+Download sources and build the lib. 
+
+```shell
+$> git clone git@github.com:shunfei/infobright-4.0.7.git
+$> cd infobright-4.0.7
+$> ./compile_java_lib.sh
+$> ls java_lib/
+```
+
+Now the `java_lib` folder should contains two lib files. 
+
+On mac:
 
 ```
-cd <infobright src home>/src/storage/brighthouse
-
-g++ -c -fPIC -I./ -I./community compress/*.cpp 
-g++ -shared -o libcompress.so *.o -lboost_system
-
+libbhcompress.dylib
+libboost_system.dylib
 ```
 
-`libcompress.so` is the dynamic lib we want, right?
+On linux:
+
+```
+libbhcompress.so
+libboost_system.so
+```
