@@ -1,6 +1,6 @@
 This project is based on infobright-4.0.7 community edition.
 
-We exported the compression algorithm to Java via JNI.
+We export the compression algorithm to Java via JNI.
 
 
 *Node: You should compile c++ lib on the same platform as your cluster will run.*
