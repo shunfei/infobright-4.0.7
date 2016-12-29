@@ -38,6 +38,9 @@ else
     exit 1
 fi
 
+rm -f ${LIBDIR}/${BHLIB}
+rm -f ${LIBDIR}/${BOOST_SYSTEM_LIB}
+
 if [[ "x$1" == "x-j" ]]; then
     echo "Compiling ${BHROOT}/compress/JavaCompress.cpp"
     rm -f ${CPP_OUT_DIR}/JavaCompress.o
