@@ -20,7 +20,7 @@ $> ./b2 install
 $> ls /usr/local/lib/
 ```
 
-Check boost libs at `/usr/local/lib/`, we only need to deploy all libs in it.
+Check boost libs at `/usr/local/lib/`, we need to deploy all libs in it.
 
 ### Install boost on Mac
 
@@ -31,6 +31,7 @@ $> sudo brew install boost
 $> ls /usr/local/lib/*
 ```
 
+Check boost libs at `/usr/local/lib/`, we need to deploy all libs in it.
 
 ### Compile cpp lib
 
@@ -43,7 +44,7 @@ $> ./compile_java_lib.sh
 $> ls java_lib/
 ```
 
-Now the `java_lib` folder should contains lib file. 
+Now the `java_lib` folder should contains compress lib file. 
 
 On mac:
 
