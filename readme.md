@@ -17,10 +17,10 @@ $> tar -xzf boost_1_59_0.tar.gz
 $> cd boost_1_59_0
 $> ./bootstrap.sh --prefix=/usr/local
 $> ./b2 install
-$> ls /usr/local/lib/libboost_system.so
+$> ls /usr/local/lib/
 ```
 
-Check boost libs at `/usr/local/lib/`, we only need `/usr/local/lib/libboost_system.so`
+Check boost libs at `/usr/local/lib/`, we only need to deploy all libs in it.
 
 ### Install boost on Mac
 
@@ -28,7 +28,7 @@ Install via brew
 
 ```shell
 $> sudo brew install boost
-$> ls /usr/local/lib/libboost_system.dylib
+$> ls /usr/local/lib/*
 ```
 
 
@@ -43,18 +43,16 @@ $> ./compile_java_lib.sh
 $> ls java_lib/
 ```
 
-Now the `java_lib` folder should contains two lib files. 
+Now the `java_lib` folder should contains lib file. 
 
 On mac:
 
 ```
 libbhcompress.dylib
-libboost_system.dylib
 ```
 
 On linux:
 
 ```
 libbhcompress.so
-libboost_system.so
 ```
