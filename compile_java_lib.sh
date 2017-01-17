@@ -61,14 +61,6 @@ fi
 
 echo "Generated ${LIBDIR}/${BHLIB}"
 
-cp ${BOOST_LIBS_DIR}/${BOOST_SYSTEM_LIB} ${LIBDIR}/
-
-if [ ! "x$?" = "x0" ]; then
-    exit $?
-fi
-
-echo "Generated ${LIBDIR}/${BOOST_SYSTEM_LIB}"
-
 # Compilation done.
 #######################
 
