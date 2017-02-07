@@ -1,9 +1,11 @@
+**This project is deprecated, use [https://github.com/shunfei/indexr-compress-lib](https://github.com/shunfei/indexr-compress-lib) instead!**
+
 This project is based on infobright-4.0.7 community edition.
 
 We export the compression algorithm to Java via JNI.
 
 
-*Node: You should compile c++ lib on the same platform as your cluster will run.*
+*Note: You should compile c++ lib on the same platform as your cluster will run.*
 
 ### Install boost on Linux
 
